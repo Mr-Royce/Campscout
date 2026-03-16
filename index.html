@@ -404,8 +404,8 @@ async function checkAvailability(){
       try{
         const avParams = new URLSearchParams({ proxy: 'recgov', cgId, month });
         const avResp = await fetch(`${PROXY}?${avParams.toString()}`);
-        if (!avResp.ok) throw new Error(`HTTP ${avResp.status}`);
         const avData = await avResp.json();
+        if (!avResp.ok) throw new Error(avData.error || `HTTP ${avResp.status}: ${avData.url || ''}`);
         const campsites=avData.campsites||{};
         const available=[];
         for(const [siteId,site] of Object.entries(campsites)){
