@@ -1,1 +1,475 @@
+<!DOCTYPE html>
 
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>CampScout</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f2f2f7;
+      color: #1c1c1e;
+      min-height: 100vh;
+      padding: 0 0 60px;
+    }
+    header {
+      background: #fff;
+      border-bottom: 0.5px solid #c6c6c8;
+      padding: 18px 20px 14px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; }
+    header p { font-size: 13px; color: #8e8e93; margin-top: 2px; }
+    .section {
+      background: #fff;
+      border-radius: 12px;
+      margin: 16px 16px 0;
+      overflow: hidden;
+      border: 0.5px solid #c6c6c8;
+    }
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #8e8e93;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 14px 16px 6px;
+    }
+    .field {
+      padding: 10px 16px;
+      border-bottom: 0.5px solid #f2f2f7;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .field:last-child { border-bottom: none; }
+    .field label { font-size: 15px; min-width: 90px; color: #1c1c1e; }
+    .field input, .field select {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      color: #1c1c1e;
+      background: transparent;
+      text-align: right;
+      font-family: inherit;
+    }
+    .field input::placeholder { color: #c7c7cc; }
+    .tabs {
+      display: flex;
+      background: #f2f2f7;
+      border-radius: 9px;
+      padding: 2px;
+      margin: 16px 16px 0;
+    }
+    .tab {
+      flex: 1;
+      padding: 7px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 7px;
+      cursor: pointer;
+      color: #8e8e93;
+      border: none;
+      background: transparent;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .tab.active {
+      background: #fff;
+      color: #1c1c1e;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 16px 14px;
+    }
+    .pill {
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1.5px solid #c6c6c8;
+      cursor: pointer;
+      background: #fff;
+      color: #8e8e93;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .pill.active {
+      border-color: #34c759;
+      background: #f0fdf4;
+      color: #1a7f37;
+    }
+    .search-btn {
+      display: block;
+      width: calc(100% - 32px);
+      margin: 16px 16px 0;
+      padding: 15px;
+      background: #34c759;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s;
+    }
+    .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .search-btn:active:not(:disabled) { opacity: 0.85; }
+    .result-box {
+      background: #fff;
+      border-radius: 12px;
+      margin: 16px 16px 0;
+      padding: 16px;
+      border: 0.5px solid #c6c6c8;
+      font-size: 15px;
+      line-height: 1.65;
+      color: #1c1c1e;
+      white-space: pre-wrap;
+      word-break: break-word;
+      display: none;
+    }
+    .result-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #8e8e93;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+    .status-box {
+      text-align: center;
+      padding: 28px 16px;
+      color: #8e8e93;
+      font-size: 15px;
+      display: none;
+    }
+    .status-box .spinner {
+      font-size: 32px;
+      display: block;
+      margin-bottom: 10px;
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+    .err {
+      color: #ff3b30;
+      font-size: 14px;
+      text-align: center;
+      padding: 10px 16px 0;
+      display: none;
+    }
+    .clear-btn {
+      display: block;
+      width: calc(100% - 32px);
+      margin: 12px 16px 0;
+      padding: 13px;
+      background: transparent;
+      border: 1.5px solid #c6c6c8;
+      border-radius: 12px;
+      font-size: 15px;
+      color: #8e8e93;
+      cursor: pointer;
+      font-family: inherit;
+      display: none;
+    }
+    #apiKeySection {
+      background: #fff3cd;
+      border: 1.5px solid #ffc107;
+      border-radius: 12px;
+      margin: 16px 16px 0;
+      padding: 14px 16px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    #apiKeySection input {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1.5px solid #c6c6c8;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: monospace;
+      outline: none;
+    }
+    #apiKeySection input:focus { border-color: #34c759; }
+    .save-key-btn {
+      margin-top: 10px;
+      padding: 9px 20px;
+      background: #ffc107;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🏕 CampScout</h1>
+  <p>AI campsite availability agent</p>
+</header>
+
+<!-- API Key setup -->
+
+<div id="apiKeySection">
+  <strong>Enter your Anthropic API key to get started.</strong><br>
+  It will be saved in your browser for future visits.
+  <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
+  <button class="save-key-btn" onclick="saveKey()">Save Key</button>
+</div>
+
+<!-- Mode tabs -->
+
+<div class="tabs">
+  <button class="tab active" onclick="setMode('specific', this)">Specific campground</button>
+  <button class="tab" onclick="setMode('area', this)">Area search</button>
+</div>
+
+<!-- Specific campground -->
+
+<div id="mode-specific">
+  <div class="section-label" style="margin: 0 16px; padding-left:0; padding-right:0;">Campground</div>
+  <div class="section">
+    <div class="field">
+      <label>Name</label>
+      <input type="text" id="campground" placeholder="e.g. Yosemite Valley" />
+    </div>
+  </div>
+</div>
+
+<!-- Area search -->
+
+<div id="mode-area" style="display:none;">
+  <div class="section-label" style="margin: 0 16px; padding-left:0; padding-right:0;">Location</div>
+  <div class="section">
+    <div class="field">
+      <label>Zip code</label>
+      <input type="number" id="zipcode" placeholder="95389" maxlength="5" />
+    </div>
+    <div class="field">
+      <label>Radius</label>
+      <select id="radius">
+        <option value="10">10 miles</option>
+        <option value="25" selected>25 miles</option>
+        <option value="50">50 miles</option>
+        <option value="75">75 miles</option>
+        <option value="100">100 miles</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Dates -->
+
+<div class="section-label" style="margin: 12px 16px 0; padding:0;">Dates</div>
+<div class="section">
+  <div class="field">
+    <label>Check in</label>
+    <input type="date" id="startDate" />
+  </div>
+  <div class="field">
+    <label>Check out</label>
+    <input type="date" id="endDate" />
+  </div>
+</div>
+
+<!-- Platforms -->
+
+<div class="section-label" style="margin: 12px 16px 0; padding:0;">Platforms</div>
+<div class="section">
+  <div class="platforms">
+    <button class="pill active" onclick="togglePill(this)">Recreation.gov</button>
+    <button class="pill active" onclick="togglePill(this)">Reserve America</button>
+    <button class="pill active" onclick="togglePill(this)">Hipcamp</button>
+    <button class="pill active" onclick="togglePill(this)">CA State Parks</button>
+  </div>
+</div>
+
+<div class="err" id="errMsg"></div>
+<button class="search-btn" id="searchBtn" onclick="runSearch()">Find Campsites</button>
+
+<!-- Status / loading -->
+
+<div class="status-box" id="statusBox">
+  <span class="spinner">🔍</span>
+  Searching campground platforms…<br>
+  <span style="font-size:13px;">This may take 20–40 seconds</span>
+</div>
+
+<!-- Results -->
+
+<div class="result-box" id="resultBox">
+  <div class="result-label">Results</div>
+  <div id="resultText"></div>
+</div>
+<button class="clear-btn" id="clearBtn" onclick="clearAll()">New Search</button>
+
+<script>
+  const TODAY = new Date().toISOString().split('T')[0];
+  document.getElementById('startDate').min = TODAY;
+  document.getElementById('endDate').min = TODAY;
+  document.getElementById('startDate').addEventListener('change', e => {
+    document.getElementById('endDate').min = e.target.value || TODAY;
+  });
+
+  let mode = 'specific';
+
+  // Load saved API key
+  window.addEventListener('load', () => {
+    const saved = localStorage.getItem('campscout_api_key');
+    if (saved) {
+      document.getElementById('apiKeySection').style.display = 'none';
+    }
+  });
+
+  function saveKey() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    if (!key.startsWith('sk-')) return showErr('That doesn\'t look like a valid API key.');
+    localStorage.setItem('campscout_api_key', key);
+    document.getElementById('apiKeySection').style.display = 'none';
+    showErr('');
+  }
+
+  function getKey() {
+    return localStorage.getItem('campscout_api_key') || '';
+  }
+
+  function setMode(m, btn) {
+    mode = m;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('mode-specific').style.display = m === 'specific' ? 'block' : 'none';
+    document.getElementById('mode-area').style.display = m === 'area' ? 'block' : 'none';
+  }
+
+  function togglePill(el) { el.classList.toggle('active'); }
+
+  function fmtDate(d) {
+    if (!d) return '';
+    return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function showErr(msg) {
+    const el = document.getElementById('errMsg');
+    el.textContent = msg;
+    el.style.display = msg ? 'block' : 'none';
+  }
+
+  function setLoading(on) {
+    document.getElementById('statusBox').style.display = on ? 'block' : 'none';
+    document.getElementById('searchBtn').disabled = on;
+    document.getElementById('searchBtn').textContent = on ? 'Searching…' : 'Find Campsites';
+    if (on) {
+      document.getElementById('resultBox').style.display = 'none';
+      document.getElementById('clearBtn').style.display = 'none';
+    }
+  }
+
+  async function runSearch() {
+    const key = getKey();
+    if (!key) return showErr('Please enter your API key above first.');
+
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const platforms = [...document.querySelectorAll('.pill.active')].map(p => p.textContent);
+    if (!startDate || !endDate) return showErr('Please select check-in and check-out dates.');
+    if (platforms.length === 0) return showErr('Select at least one platform.');
+
+    let userMsg = '';
+    if (mode === 'specific') {
+      const campground = document.getElementById('campground').value.trim();
+      if (!campground) return showErr('Please enter a campground name.');
+      userMsg = `Find available campsites at "${campground}" from ${fmtDate(startDate)} to ${fmtDate(endDate)}. Check these platforms: ${platforms.join(', ')}.`;
+    } else {
+      const zip = document.getElementById('zipcode').value.trim();
+      const radius = document.getElementById('radius').value;
+      if (!zip || zip.length < 5) return showErr('Please enter a valid 5-digit zip code.');
+      userMsg = `Find campgrounds with available campsites within ${radius} miles of zip code ${zip}, for dates ${fmtDate(startDate)} to ${fmtDate(endDate)}. Search these platforms: ${platforms.join(', ')}. List campground names, site types, pricing, and direct booking links.`;
+    }
+
+    showErr('');
+    setLoading(true);
+
+    const systemPrompt = `You are a campsite availability research agent. Use web search to find real, current campsite availability.
+
+For SPECIFIC campground searches: search each platform for availability, site types, pricing, direct booking links, and waitlist options.
+
+For AREA searches: determine the region for the zip code, then search each platform for campgrounds nearby. Aim to find 3-5 campgrounds per platform with availability info, site types, pricing, and direct booking links.
+
+Always include direct booking URLs. Never fabricate availability. Format with clear sections per platform.`;
+
+    try {
+      let messages = [{ role: 'user', content: userMsg }];
+      let finalText = '';
+
+      for (let i = 0; i < 8; i++) {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': key,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 1500,
+            system: systemPrompt,
+            tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+            messages
+          })
+        });
+
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message);
+
+        const textBlocks = data.content.filter(b => b.type === 'text');
+        if (textBlocks.length) finalText = textBlocks.map(b => b.text).join('\n');
+        if (data.stop_reason !== 'tool_use') break;
+
+        const toolUses = data.content.filter(b => b.type === 'tool_use');
+        messages = [
+          ...messages,
+          { role: 'assistant', content: data.content },
+          { role: 'user', content: toolUses.map(t => ({ type: 'tool_result', tool_use_id: t.id, content: 'Search executed.' })) }
+        ];
+      }
+
+      if (!finalText) finalText = 'No results returned. Please try again.';
+      document.getElementById('resultText').textContent = finalText;
+      document.getElementById('resultBox').style.display = 'block';
+      document.getElementById('clearBtn').style.display = 'block';
+      document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth' });
+
+    } catch (err) {
+      showErr('Search failed: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function clearAll() {
+    document.getElementById('campground').value = '';
+    document.getElementById('zipcode').value = '';
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
+    document.getElementById('resultBox').style.display = 'none';
+    document.getElementById('clearBtn').style.display = 'none';
+    showErr('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>
