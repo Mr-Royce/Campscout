@@ -264,12 +264,22 @@ async function findCampgrounds() {
     const resp = await fetch(`${PROXY}?${params.toString()}`);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const d = await resp.json();
-    const combined = d.RECDATA || [];
+    let combined = d.RECDATA || [];
 
-    // Show debug info temporarily
-    if (d.debug) {
-      console.log('RIDB debug:', JSON.stringify(d.debug, null, 2));
-      showErr(`Debug: coord returned ${d.debug.coordTotal ?? 'n/a'} results (status ${d.debug.coordStatus ?? '?'}). Sample: ${JSON.stringify(d.debug.coordSample || []).slice(0,200)}`);
+    // Filter by distance from pin using haversine
+    const radiusMiles = parseInt(radius);
+    if (pinLat && pinLng && combined.length) {
+      combined = combined.filter(f => {
+        const fLat = parseFloat(f.FacilityLatitude);
+        const fLng = parseFloat(f.FacilityLongitude);
+        if (!fLat || !fLng) return true; // keep if no coords
+        const R = 3958.8;
+        const dLat = (fLat - pinLat) * Math.PI / 180;
+        const dLng = (fLng - pinLng) * Math.PI / 180;
+        const a = Math.sin(dLat/2)**2 + Math.cos(pinLat*Math.PI/180) * Math.cos(fLat*Math.PI/180) * Math.sin(dLng/2)**2;
+        const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return dist <= radiusMiles;
+      });
     }
 
     // Filter to campgrounds client-side
