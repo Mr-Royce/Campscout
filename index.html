@@ -252,14 +252,14 @@ async function findCampgrounds() {
     const keyword=(document.getElementById('keyword').value||'').trim();
 
     // Always run coordinate search
-    const coordPath=`/facilities?facilitytype=Campground&latitude=${pinLat.toFixed(5)}&longitude=${pinLng.toFixed(5)}&radius=${radius}&limit=100&full=true`;
+    const coordPath=`/facilities?latitude=${pinLat.toFixed(5)}&longitude=${pinLng.toFixed(5)}&radius=${radius}&limit=100&full=true&activity=9`;
     const coordResp=await proxyFetch({proxy:'ridb',path:coordPath});
     let combined=(coordResp.RECDATA||[]);
 
     // Also run keyword search if provided, or always run one based on area
     const kwQuery=keyword||'';
     if(kwQuery){
-      const kwPath=`/facilities?facilitytype=Campground&query=${encodeURIComponent(kwQuery)}&limit=50&full=true`;
+      const kwPath=`/facilities?query=${encodeURIComponent(kwQuery)}&limit=50&full=true&activity=9`;
       const kwResp=await proxyFetch({proxy:'ridb',path:kwPath});
       const kwResults=kwResp.RECDATA||[];
       // Merge, dedup by FacilityID
@@ -267,12 +267,16 @@ async function findCampgrounds() {
       kwResults.forEach(f=>{ if(!seen.has(f.FacilityID)){ combined.push(f); seen.add(f.FacilityID); } });
     }
 
-    // Filter to campgrounds only
-    allCampgrounds=combined.filter(f=>
-      f.FacilityTypeDescription==='Campground'||
-      (f.FacilityName||'').toLowerCase().includes('camp')
-    );
-    if(!allCampgrounds.length) allCampgrounds=combined;
+    // Filter strictly to actual campgrounds client-side
+    const CAMPING_TYPES = ['campground','camp','camping','campsite','rv park','rv resort'];
+    const isCampground = f => {
+      const name = (f.FacilityName||'').toLowerCase();
+      const type = (f.FacilityTypeDescription||'').toLowerCase();
+      return type.includes('campground') ||
+             CAMPING_TYPES.some(t => name.includes(t));
+    };
+    allCampgrounds = combined.filter(isCampground);
+    if(!allCampgrounds.length) allCampgrounds = combined; // last resort fallback
     if(!allCampgrounds.length){ showErr('No campgrounds found. Try a larger radius or add a keyword.'); return; }
 
     selectedCGs=[];
