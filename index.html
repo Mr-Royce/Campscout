@@ -245,10 +245,17 @@ async function findCampgrounds() {
   setLoading(true,'Finding campgrounds…');
   try {
     const radius=document.getElementById('radius').value;
-    const path=`/facilities?activity=CAMPING&latitude=${pinLat.toFixed(5)}&longitude=${pinLng.toFixed(5)}&radius=${radius}&limit=30&full=true`;
+    const path=`/facilities?facilitytype=Campground&latitude=${pinLat.toFixed(5)}&longitude=${pinLng.toFixed(5)}&radius=${radius}&limit=50&full=true`;
     const d=await proxyFetch({proxy:'ridb',path});
-    allCampgrounds=(d.RECDATA||[]).filter(f=>f.Reservable&&(f.FacilityTypeDescription==='Campground'||f.FacilityName.toLowerCase().includes('camp')));
-    if(!allCampgrounds.length){ showErr('No bookable campgrounds found. Try a larger radius.'); return; }
+    const raw = d.RECDATA || [];
+    // Try strict filter first, fall back to looser if nothing found
+    allCampgrounds = raw.filter(f =>
+      f.FacilityTypeDescription === 'Campground' ||
+      (f.FacilityName||'').toLowerCase().includes('camp')
+    );
+    // If still nothing, just show everything returned
+    if (!allCampgrounds.length) allCampgrounds = raw;
+    if (!allCampgrounds.length) { showErr('No campgrounds found in this area. Try a larger radius or move the pin.'); return; }
     selectedCGs=[];
     renderCGPicker();
     ['cgSection','dateSection','siteTypeSection'].forEach(id=>document.getElementById(id).style.display='block');
