@@ -283,13 +283,18 @@ async function findCampgrounds() {
     }
 
     // Filter to campgrounds client-side
-    const CAMP_WORDS = ['campground','camp','camping','campsite','rv park','rv resort'];
+    const CAMP_WORDS = ['campground','camping','rv park','rv resort'];
+    const BLOCK_WORDS = ['picnic','shelter','visitor','marina','lodge','cabin rental','hostel','hotel','museum','trailhead','boat','swim','fishing','historic','heritage','plaza','office','center','powerhouse','mansion','inn'];
     allCampgrounds = combined.filter(f => {
       const name = (f.FacilityName||'').toLowerCase();
       const type = (f.FacilityTypeDescription||'').toLowerCase();
+      if (BLOCK_WORDS.some(w => name.includes(w))) return false;
       return type.includes('campground') || CAMP_WORDS.some(w => name.includes(w));
     });
-    if (!allCampgrounds.length) allCampgrounds = combined;
+    if (!allCampgrounds.length) allCampgrounds = combined.filter(f => {
+      const name = (f.FacilityName||'').toLowerCase();
+      return !['picnic','shelter','visitor','marina','powerhouse','mansion'].some(w => name.includes(w));
+    });
     if (!allCampgrounds.length) { showErr('No campgrounds found. Try a larger radius or add a keyword.'); return; }
 
     selectedCGs=[];
@@ -397,7 +402,10 @@ async function checkAvailability(){
       const cgName=cg?cg.FacilityName:cgId;
       const month=fmtDate(startDate).slice(0,7)+'-01T00:00:00.000Z';
       try{
-        const avData=await proxyFetch({proxy:'recgov',cgId,month});
+        const avParams = new URLSearchParams({ proxy: 'recgov', cgId, month });
+        const avResp = await fetch(`${PROXY}?${avParams.toString()}`);
+        if (!avResp.ok) throw new Error(`HTTP ${avResp.status}`);
+        const avData = await avResp.json();
         const campsites=avData.campsites||{};
         const available=[];
         for(const [siteId,site] of Object.entries(campsites)){
