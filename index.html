@@ -402,25 +402,23 @@ async function checkAvailability(){
       const cgName=cg?cg.FacilityName:cgId;
       const month=fmtDate(startDate).slice(0,7)+'-01T00:00:00.000Z';
       try{
-        const avParams = new URLSearchParams({ proxy: 'recgov', cgId, month });
-        const avResp = await fetch(`${PROXY}?${avParams.toString()}`);
+        // Call Recreation.gov directly — their availability API supports browser CORS
+        const avUrl = `https://www.recreation.gov/api/camps/availability/campground/${cgId}/month?start_date=${encodeURIComponent(month)}`;
+        const avResp = await fetch(avUrl, {
+          headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Referer': 'https://www.recreation.gov/',
+          }
+        });
+        if (!avResp.ok) throw new Error(`HTTP ${avResp.status}`);
         const avData = await avResp.json();
-        if (!avResp.ok) throw new Error(avData.error || `HTTP ${avResp.status}: ${avData.url || ''}`);
-        const campsites=avData.campsites||{};
-        // Debug: log a sample of what keys look like
-        const sampleSite = Object.values(campsites)[0];
-        if (sampleSite) {
-          const sampleKeys = Object.keys(sampleSite.availabilities || {}).slice(0,3);
-          console.log('Sample availability keys:', sampleKeys);
-          console.log('We are looking for key like:', fmtDate(startDate)+'T00:00:00Z');
-        }
         const available=[];
         for(const [siteId,site] of Object.entries(campsites)){
           if(siteTypes.length&&!siteTypes.includes(site.campsite_type)) continue;
           let ok=true;
           for(let i=0;i<nights;i++){
             const cd=new Date(startDate); cd.setDate(cd.getDate()+i);
-            const key=fmtDate(cd)+'T00:00:00Z';
+            const key=fmtDate(cd)+'T00:00:00.000Z';
             if(!site.availabilities||site.availabilities[key]!=='Available'){ok=false;break;}
           }
           if(ok) available.push({siteId,siteName:site.site,siteType:site.campsite_type,loop:site.loop});
