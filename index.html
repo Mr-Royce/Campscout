@@ -473,7 +473,7 @@ async function checkAvailability(){
           let ok=true;
           for(let i=0;i<nights;i++){
             const cd=new Date(startDate); cd.setDate(cd.getDate()+i);
-            const key=fmtDate(cd)+'T00:00:00.000Z';
+            const key=fmtDate(cd)+'T00:00:00Z';
             if(!site.availabilities||site.availabilities[key]!=='Available'){ok=false;break;}
           }
           if(ok) available.push({siteId,siteName:site.site,siteType:site.campsite_type,loop:site.loop});
