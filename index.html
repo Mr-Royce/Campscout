@@ -407,6 +407,13 @@ async function checkAvailability(){
         const avData = await avResp.json();
         if (!avResp.ok) throw new Error(avData.error || `HTTP ${avResp.status}: ${avData.url || ''}`);
         const campsites=avData.campsites||{};
+        // Debug: log a sample of what keys look like
+        const sampleSite = Object.values(campsites)[0];
+        if (sampleSite) {
+          const sampleKeys = Object.keys(sampleSite.availabilities || {}).slice(0,3);
+          console.log('Sample availability keys:', sampleKeys);
+          console.log('We are looking for key like:', fmtDate(startDate)+'T00:00:00Z');
+        }
         const available=[];
         for(const [siteId,site] of Object.entries(campsites)){
           if(siteTypes.length&&!siteTypes.includes(site.campsite_type)) continue;
