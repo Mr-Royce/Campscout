@@ -391,6 +391,7 @@ function updateCheckBtn() {
 }
 
 function renderCal() {
+  console.log('renderCal: calYear=', calYear, 'calMonth=', calMonth, '(', new Date(calYear,calMonth,1).toLocaleString('en-US',{month:'long'}), ')');
   document.getElementById('calTitle').textContent=new Date(calYear,calMonth,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
   const grid=document.getElementById('calGrid'); grid.innerHTML='';
   ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d=>{ const el=document.createElement('div'); el.className='cal-day-name'; el.textContent=d; grid.appendChild(el); });
