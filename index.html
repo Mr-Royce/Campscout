@@ -412,6 +412,9 @@ async function checkAvailability(){
         });
         if (!avResp.ok) throw new Error(`HTTP ${avResp.status}`);
         const avData = await avResp.json();
+        console.log('avData keys:', Object.keys(avData));
+        const campsites = avData.campsites || {};
+        console.log('campsites count:', Object.keys(campsites).length);
         const available=[];
         for(const [siteId,site] of Object.entries(campsites)){
           if(siteTypes.length&&!siteTypes.includes(site.campsite_type)) continue;
