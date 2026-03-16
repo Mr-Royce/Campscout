@@ -446,14 +446,16 @@ async function checkAvailability(){
     for(const cgId of selectedCGs){
       const cg=allCampgrounds.find(c=>c.FacilityID===cgId);
       const cgName=cg?cg.FacilityName:cgId;
-      const month=fmtDate(startDate).slice(0,7)+'-01T00:00:00Z';
+      const month=fmtDate(startDate).slice(0,7)+'-01T00:00:00.000Z';
       try{
-        // Call Recreation.gov directly — their availability API supports browser CORS
+        // Recreation.gov wants the date double-encoded in the query string
         const avUrl = `https://www.recreation.gov/api/camps/availability/campground/${cgId}/month?start_date=${encodeURIComponent(month)}`;
         const avResp = await fetch(avUrl, {
+          credentials: 'include',
           headers: {
             'Accept': 'application/json, text/plain, */*',
             'Referer': 'https://www.recreation.gov/',
+            'Origin': 'https://www.recreation.gov',
           }
         });
         if (!avResp.ok) throw new Error(`HTTP ${avResp.status}`);
@@ -474,6 +476,7 @@ async function checkAvailability(){
           for(let i=0;i<nights;i++){
             const cd=new Date(startDate); cd.setDate(cd.getDate()+i);
             const key=fmtDate(cd)+'T00:00:00Z';
+            // RecGov returns keys like '2026-04-26T00:00:00Z'
             if(!site.availabilities||site.availabilities[key]!=='Available'){ok=false;break;}
           }
           if(ok) available.push({siteId,siteName:site.site,siteType:site.campsite_type,loop:site.loop});
