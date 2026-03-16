@@ -467,6 +467,8 @@ async function checkAvailability(){
           const sampleKeys = Object.keys(sampleSite.availabilities||{}).slice(0,3);
           console.log('Actual keys from RecGov:', sampleKeys);
           console.log('We are checking for:', fmtDate(startDate)+'T00:00:00Z');
+          const firstKey = sampleKeys[0];
+          console.log('Value at first key:', sampleSite.availabilities[firstKey]);
         }
         const available=[];
         for(const [siteId,site] of Object.entries(campsites)){
