@@ -266,6 +266,12 @@ async function findCampgrounds() {
     const d = await resp.json();
     const combined = d.RECDATA || [];
 
+    // Show debug info temporarily
+    if (d.debug) {
+      console.log('RIDB debug:', JSON.stringify(d.debug, null, 2));
+      showErr(`Debug: coord returned ${d.debug.coordTotal ?? 'n/a'} results (status ${d.debug.coordStatus ?? '?'}). Sample: ${JSON.stringify(d.debug.coordSample || []).slice(0,200)}`);
+    }
+
     // Filter to campgrounds client-side
     const CAMP_WORDS = ['campground','camp','camping','campsite','rv park','rv resort'];
     allCampgrounds = combined.filter(f => {
