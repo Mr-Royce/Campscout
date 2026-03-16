@@ -419,6 +419,7 @@ function renderCal() {
 function prevMonth(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCal(); }
 function nextMonth(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCal(); }
 function pickDate(date){
+  console.log('pickDate called with:', date.toString(), 'fmtDate:', fmtDate(date));
   if(pickingStart||(startDate&&date<startDate)){ startDate=date; endDate=null; pickingStart=false; }
   else{ endDate=date; pickingStart=true; }
   const fmt=d=>d?d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Tap a date';
