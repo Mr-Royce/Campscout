@@ -251,33 +251,30 @@ async function findCampgrounds() {
     const radius=document.getElementById('radius').value;
     const keyword=(document.getElementById('keyword').value||'').trim();
 
-    // Always run coordinate search
-    const coordPath=`/facilities?latitude=${pinLat.toFixed(5)}&longitude=${pinLng.toFixed(5)}&radius=${radius}&limit=100&full=true&activity=9`;
-    const coordResp=await proxyFetch({proxy:'ridb',path:coordPath});
-    let combined=(coordResp.RECDATA||[]);
+    // Build params — worker handles both coordinate + keyword search and merging
+    const params = new URLSearchParams({
+      proxy: 'ridb',
+      lat: pinLat.toFixed(5),
+      lng: pinLng.toFixed(5),
+      radius,
+      limit: '100',
+    });
+    if (keyword) params.set('keyword', keyword);
 
-    // Also run keyword search if provided, or always run one based on area
-    const kwQuery=keyword||'';
-    if(kwQuery){
-      const kwPath=`/facilities?query=${encodeURIComponent(kwQuery)}&limit=50&full=true&activity=9`;
-      const kwResp=await proxyFetch({proxy:'ridb',path:kwPath});
-      const kwResults=kwResp.RECDATA||[];
-      // Merge, dedup by FacilityID
-      const seen=new Set(combined.map(f=>f.FacilityID));
-      kwResults.forEach(f=>{ if(!seen.has(f.FacilityID)){ combined.push(f); seen.add(f.FacilityID); } });
-    }
+    const resp = await fetch(`${PROXY}?${params.toString()}`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const d = await resp.json();
+    const combined = d.RECDATA || [];
 
-    // Filter strictly to actual campgrounds client-side
-    const CAMPING_TYPES = ['campground','camp','camping','campsite','rv park','rv resort'];
-    const isCampground = f => {
+    // Filter to campgrounds client-side
+    const CAMP_WORDS = ['campground','camp','camping','campsite','rv park','rv resort'];
+    allCampgrounds = combined.filter(f => {
       const name = (f.FacilityName||'').toLowerCase();
       const type = (f.FacilityTypeDescription||'').toLowerCase();
-      return type.includes('campground') ||
-             CAMPING_TYPES.some(t => name.includes(t));
-    };
-    allCampgrounds = combined.filter(isCampground);
-    if(!allCampgrounds.length) allCampgrounds = combined; // last resort fallback
-    if(!allCampgrounds.length){ showErr('No campgrounds found. Try a larger radius or add a keyword.'); return; }
+      return type.includes('campground') || CAMP_WORDS.some(w => name.includes(w));
+    });
+    if (!allCampgrounds.length) allCampgrounds = combined;
+    if (!allCampgrounds.length) { showErr('No campgrounds found. Try a larger radius or add a keyword.'); return; }
 
     selectedCGs=[];
     renderCGPicker();
