@@ -485,7 +485,8 @@ async function checkAvailability(){
             const cd=new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()+i);
             const key=fmtDate(cd)+'T00:00:00Z';
             if(i===0&&siteId===Object.keys(campsites)[0]) console.log('Checking key:', key, '→', site.availabilities?.[key]);
-            if(!site.availabilities||site.availabilities[key]!=='Available'){ok=false;break;}
+            const status = site.availabilities?.[key];
+            if(!status || status === 'Reserved' || status === 'Not Available' || status === 'Not Reservable' || status === 'NYR'){ok=false;break;}
           }
           if(ok) available.push({siteId,siteName:site.site,siteType:site.campsite_type,loop:site.loop});
         }
