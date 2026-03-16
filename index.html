@@ -478,6 +478,7 @@ async function checkAvailability(){
           console.log('Value at first key:', sampleSite.availabilities[firstKey]);
         }
         const available=[];
+        const statusSample = {};
         for(const [siteId,site] of Object.entries(campsites)){
           if(siteTypes.length&&!siteTypes.includes(site.campsite_type)) continue;
           let ok=true;
@@ -486,10 +487,16 @@ async function checkAvailability(){
             const key=fmtDate(cd)+'T00:00:00Z';
             if(i===0&&siteId===Object.keys(campsites)[0]) console.log('Checking key:', key, '→', site.availabilities?.[key]);
             const status = site.availabilities?.[key];
-            if(!status || status === 'Reserved' || status === 'Not Available' || status === 'Not Reservable' || status === 'NYR'){ok=false;break;}
+            if(!status || status === 'Reserved' || status === 'Not Available' || status === 'NYR'){ok=false;break;}
+            if(status === 'Not Reservable') { ok = 'walkin'; }
           }
-          if(ok) available.push({siteId,siteName:site.site,siteType:site.campsite_type,loop:site.loop});
+          if(ok) available.push({siteId,siteName:site.site,siteType:site.campsite_type,loop:site.loop,walkin:ok==='walkin'});
+          // Collect status for first night across all sites
+          const firstKey = fmtDate(new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())) + 'T00:00:00Z';
+          const st = site.availabilities?.[firstKey];
+          if(st) statusSample[st] = (statusSample[st]||0) + 1;
         }
+        console.log('All statuses for', fmtDate(startDate), ':', statusSample);
         results.push({cgId,cgName,available,nights});
       } catch(e){ results.push({cgId,cgName,available:null,error:e.message}); }
     }
@@ -516,10 +523,10 @@ function renderResults(results,nights){
         const typeFmt=(s.siteType||'').replace(/_/g,' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
         item.innerHTML=`
           <div>
-            <div class="site-name">Site ${s.siteName}</div>
+            <div class="site-name">Site ${s.siteName}${s.walkin?' <span style="font-size:11px;background:#ff9500;color:#fff;padding:2px 6px;border-radius:4px;font-weight:600;">Walk-in</span>':''}</div>
             <div class="site-meta">${s.loop?'Loop '+s.loop+' · ':''}${typeFmt}</div>
           </div>
-          <a class="book-btn" href="https://www.recreation.gov/camping/campsites/${s.siteId}" target="_blank">Book</a>
+          <a class="book-btn" href="https://www.recreation.gov/camping/campsites/${s.siteId}" target="_blank">${s.walkin?'Info':'Book'}</a>
         `;
         sec.appendChild(item);
       });
