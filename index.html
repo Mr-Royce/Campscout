@@ -16,27 +16,33 @@
     header {
       background: #fff;
       border-bottom: 0.5px solid #c6c6c8;
-      padding: 18px 20px 14px;
+      padding: 16px 20px 12px;
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; }
-    header p { font-size: 13px; color: #8e8e93; margin-top: 2px; }
-    .section {
+    header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+    header p { font-size: 12px; color: #8e8e93; margin-top: 1px; }
+    .fav-btn {
+      background: none; border: none; font-size: 22px; cursor: pointer; padding: 4px;
+    }
+    .card {
       background: #fff;
       border-radius: 12px;
-      margin: 16px 16px 0;
+      margin: 12px 16px 0;
       overflow: hidden;
       border: 0.5px solid #c6c6c8;
     }
-    .section-label {
-      font-size: 12px;
+    .card-label {
+      font-size: 11px;
       font-weight: 600;
       color: #8e8e93;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      padding: 14px 16px 6px;
+      margin: 14px 16px 4px;
     }
     .field {
       padding: 10px 16px;
@@ -46,404 +52,681 @@
       gap: 10px;
     }
     .field:last-child { border-bottom: none; }
-    .field label { font-size: 15px; min-width: 90px; color: #1c1c1e; }
+    .field label { font-size: 15px; min-width: 80px; color: #1c1c1e; }
     .field input, .field select {
-      flex: 1;
-      border: none;
-      outline: none;
-      font-size: 15px;
-      color: #1c1c1e;
-      background: transparent;
-      text-align: right;
-      font-family: inherit;
+      flex: 1; border: none; outline: none; font-size: 15px;
+      color: #1c1c1e; background: transparent; text-align: right; font-family: inherit;
     }
     .field input::placeholder { color: #c7c7cc; }
-    .tabs {
-      display: flex;
-      background: #f2f2f7;
-      border-radius: 9px;
-      padding: 2px;
-      margin: 16px 16px 0;
-    }
-    .tab {
-      flex: 1;
-      padding: 7px;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 500;
-      border-radius: 7px;
-      cursor: pointer;
-      color: #8e8e93;
-      border: none;
-      background: transparent;
-      transition: all 0.15s;
-      font-family: inherit;
-    }
-    .tab.active {
-      background: #fff;
-      color: #1c1c1e;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-    }
-    .platforms {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 12px 16px 14px;
-    }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 7px; padding: 10px 16px 14px; }
     .pill {
-      padding: 6px 14px;
-      border-radius: 99px;
-      font-size: 13px;
-      font-weight: 500;
-      border: 1.5px solid #c6c6c8;
-      cursor: pointer;
-      background: #fff;
-      color: #8e8e93;
-      transition: all 0.15s;
-      font-family: inherit;
+      padding: 5px 13px; border-radius: 99px; font-size: 13px; font-weight: 500;
+      border: 1.5px solid #c6c6c8; cursor: pointer; background: #fff;
+      color: #8e8e93; transition: all 0.15s; font-family: inherit;
     }
-    .pill.active {
-      border-color: #34c759;
-      background: #f0fdf4;
-      color: #1a7f37;
+    .pill.active { border-color: #34c759; background: #f0fdf4; color: #1a7f37; }
+    .pill.site-active { border-color: #007aff; background: #e8f4ff; color: #0055cc; }
+
+    /* Calendar */
+    .cal-wrap { padding: 10px 12px 14px; }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .cal-header span { font-size: 15px; font-weight: 600; }
+    .cal-nav { background: none; border: none; font-size: 20px; cursor: pointer; padding: 2px 8px; color: #007aff; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-day-name { text-align: center; font-size: 11px; color: #8e8e93; padding: 4px 0; font-weight: 500; }
+    .cal-day {
+      text-align: center; font-size: 14px; padding: 7px 2px; border-radius: 8px;
+      cursor: pointer; transition: all 0.1s; position: relative;
     }
+    .cal-day:empty { cursor: default; }
+    .cal-day.other-month { color: #c7c7cc; }
+    .cal-day.today { font-weight: 700; color: #007aff; }
+    .cal-day.past { color: #c7c7cc; cursor: default; }
+    .cal-day.selected { background: #007aff; color: #fff !important; border-radius: 8px; }
+    .cal-day.in-range { background: #e8f4ff; color: #0055cc; border-radius: 0; }
+    .cal-day.range-start { background: #007aff; color: #fff !important; border-radius: 8px 0 0 8px; }
+    .cal-day.range-end { background: #007aff; color: #fff !important; border-radius: 0 8px 8px 0; }
+    .cal-day.range-start.range-end { border-radius: 8px; }
+    .date-display {
+      display: flex; gap: 8px; padding: 0 16px 12px;
+    }
+    .date-chip {
+      flex: 1; background: #f2f2f7; border-radius: 8px; padding: 8px 10px;
+      font-size: 13px; text-align: center; color: #8e8e93;
+    }
+    .date-chip.set { color: #1c1c1e; font-weight: 500; }
+    .date-chip span { display: block; font-size: 10px; color: #8e8e93; margin-bottom: 2px; font-weight: 400; }
+
     .search-btn {
-      display: block;
-      width: calc(100% - 32px);
-      margin: 16px 16px 0;
-      padding: 15px;
-      background: #34c759;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 17px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: opacity 0.15s;
+      display: block; width: calc(100% - 32px); margin: 14px 16px 0;
+      padding: 15px; background: #34c759; color: #fff; border: none;
+      border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: opacity 0.15s;
     }
     .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .search-btn:active:not(:disabled) { opacity: 0.85; }
-    .result-box {
-      background: #fff;
-      border-radius: 12px;
-      margin: 16px 16px 0;
-      padding: 16px;
-      border: 0.5px solid #c6c6c8;
-      font-size: 15px;
-      line-height: 1.65;
-      color: #1c1c1e;
-      white-space: pre-wrap;
-      word-break: break-word;
-      display: none;
+    .secondary-btn {
+      display: block; width: calc(100% - 32px); margin: 10px 16px 0;
+      padding: 13px; background: transparent; border: 1.5px solid #c6c6c8;
+      border-radius: 12px; font-size: 15px; color: #8e8e93; cursor: pointer; font-family: inherit;
     }
-    .result-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #8e8e93;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 10px;
-    }
-    .status-box {
-      text-align: center;
-      padding: 28px 16px;
-      color: #8e8e93;
-      font-size: 15px;
-      display: none;
-    }
-    .spinner {
-      font-size: 32px;
-      display: block;
-      margin-bottom: 10px;
-      animation: spin 2s linear infinite;
-    }
+    .err { color: #ff3b30; font-size: 13px; text-align: center; padding: 8px 16px 0; display: none; }
+    .status-box { text-align: center; padding: 28px 16px; color: #8e8e93; font-size: 15px; display: none; }
+    .spinner { font-size: 28px; display: block; margin-bottom: 8px; animation: spin 2s linear infinite; }
     @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
-    .err {
-      color: #ff3b30;
-      font-size: 14px;
-      text-align: center;
-      padding: 10px 16px 0;
-      display: none;
+
+    /* Campground picker */
+    .cg-item {
+      padding: 12px 16px; border-bottom: 0.5px solid #f2f2f7;
+      display: flex; align-items: center; gap: 12px; cursor: pointer;
     }
-    .clear-btn {
-      display: none;
-      width: calc(100% - 32px);
-      margin: 12px 16px 0;
-      padding: 13px;
-      background: transparent;
-      border: 1.5px solid #c6c6c8;
-      border-radius: 12px;
-      font-size: 15px;
-      color: #8e8e93;
-      cursor: pointer;
-      font-family: inherit;
+    .cg-item:last-child { border-bottom: none; }
+    .cg-check {
+      width: 22px; height: 22px; border-radius: 50%; border: 2px solid #c6c6c8;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      font-size: 13px; transition: all 0.15s;
     }
+    .cg-check.checked { background: #34c759; border-color: #34c759; color: #fff; }
+    .cg-info { flex: 1; }
+    .cg-name { font-size: 15px; font-weight: 500; }
+    .cg-meta { font-size: 12px; color: #8e8e93; margin-top: 2px; }
+    .cg-links { display: flex; gap: 8px; margin-top: 4px; }
+    .cg-link { font-size: 11px; color: #007aff; text-decoration: none; }
+
+    /* Results */
+    .result-section { margin: 12px 16px 0; }
+    .result-section-title {
+      font-size: 13px; font-weight: 600; color: #8e8e93; text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 6px;
+    }
+    .site-item {
+      background: #fff; border-radius: 10px; border: 0.5px solid #c6c6c8;
+      padding: 12px 14px; margin-bottom: 8px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .site-info { flex: 1; }
+    .site-name { font-size: 15px; font-weight: 600; }
+    .site-meta { font-size: 13px; color: #8e8e93; margin-top: 2px; }
+    .site-price { font-size: 13px; color: #34c759; font-weight: 600; margin-top: 2px; }
+    .book-btn {
+      padding: 8px 16px; background: #007aff; color: #fff; border: none;
+      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+      font-family: inherit; white-space: nowrap; text-decoration: none; display: inline-block;
+    }
+    .no-avail {
+      background: #fff; border-radius: 10px; border: 0.5px solid #c6c6c8;
+      padding: 16px; text-align: center; color: #8e8e93; font-size: 14px;
+    }
+    .other-platforms { margin: 12px 16px 0; }
+    .platform-link {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fff; border-radius: 10px; border: 0.5px solid #c6c6c8;
+      padding: 12px 14px; margin-bottom: 8px; text-decoration: none; color: #1c1c1e;
+    }
+    .platform-link span { font-size: 15px; font-weight: 500; }
+    .platform-link small { font-size: 12px; color: #8e8e93; }
+
+    /* Favorites modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      z-index: 200; align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 20px 20px 0 0; width: 100%;
+      max-height: 70vh; overflow-y: auto; padding: 0 0 40px;
+    }
+    .modal-handle { width: 36px; height: 4px; background: #c6c6c8; border-radius: 2px; margin: 10px auto 14px; }
+    .modal-title { font-size: 17px; font-weight: 700; padding: 0 16px 12px; border-bottom: 0.5px solid #f2f2f7; }
+    .fav-item {
+      padding: 12px 16px; border-bottom: 0.5px solid #f2f2f7;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .fav-item-name { font-size: 15px; font-weight: 500; }
+    .fav-item-meta { font-size: 12px; color: #8e8e93; }
+    .fav-use-btn {
+      padding: 6px 14px; background: #34c759; color: #fff; border: none;
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .fav-del-btn {
+      padding: 6px 10px; background: none; border: none; font-size: 18px; cursor: pointer; color: #ff3b30;
+    }
+    .empty-state { padding: 32px 16px; text-align: center; color: #8e8e93; font-size: 15px; }
+
     #apiKeySection {
-      background: #fff3cd;
-      border: 1.5px solid #ffc107;
-      border-radius: 12px;
-      margin: 16px 16px 0;
-      padding: 14px 16px;
-      font-size: 14px;
-      line-height: 1.5;
+      background: #fff3cd; border: 1.5px solid #ffc107; border-radius: 12px;
+      margin: 12px 16px 0; padding: 14px 16px; font-size: 14px; line-height: 1.5;
     }
     #apiKeySection input {
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px 12px;
-      border: 1.5px solid #c6c6c8;
-      border-radius: 8px;
-      font-size: 14px;
-      font-family: monospace;
-      outline: none;
+      width: 100%; margin-top: 10px; padding: 10px 12px;
+      border: 1.5px solid #c6c6c8; border-radius: 8px; font-size: 14px;
+      font-family: monospace; outline: none;
     }
-    #apiKeySection input:focus { border-color: #34c759; }
     .save-key-btn {
-      margin-top: 10px;
-      padding: 9px 20px;
-      background: #ffc107;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
+      margin-top: 10px; padding: 9px 20px; background: #ffc107; border: none;
+      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>🏕 CampScout</h1>
-  <p>AI campsite availability agent</p>
+  <div>
+    <h1>🏕 CampScout</h1>
+    <p>Recreation.gov availability</p>
+  </div>
+  <button class="fav-btn" onclick="openFavs()" title="Saved campgrounds">⭐</button>
 </header>
 
 <div id="apiKeySection">
-  <strong>Enter your Anthropic API key to get started.</strong><br>
-  It will be saved in your browser for future visits.
+  <strong>Enter your Anthropic API key.</strong> Used only to find campgrounds by location — availability checks are free.<br>
   <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
   <button class="save-key-btn" onclick="saveKey()">Save Key</button>
 </div>
 
-<div class="tabs">
-  <button class="tab active" onclick="setMode('specific', this)">Specific campground</button>
-  <button class="tab" onclick="setMode('area', this)">Area search</button>
-</div>
-
-<div id="mode-specific">
-  <div class="section-label" style="margin: 12px 16px 0;">Campground</div>
-  <div class="section">
-    <div class="field">
-      <label>Name</label>
-      <input type="text" id="campground" placeholder="e.g. Yosemite Valley" />
-    </div>
-  </div>
-</div>
-
-<div id="mode-area" style="display:none;">
-  <div class="section-label" style="margin: 12px 16px 0;">Location</div>
-  <div class="section">
-    <div class="field">
-      <label>Zip code</label>
-      <input type="number" id="zipcode" placeholder="95389" />
-    </div>
-    <div class="field">
-      <label>Radius</label>
-      <select id="radius">
-        <option value="10">10 miles</option>
-        <option value="25" selected>25 miles</option>
-        <option value="50">50 miles</option>
-        <option value="75">75 miles</option>
-        <option value="100">100 miles</option>
-      </select>
-    </div>
-  </div>
-</div>
-
-<div class="section-label" style="margin: 12px 16px 0;">Dates</div>
-<div class="section">
+<!-- Step 1: Location -->
+<div class="card-label">1 — Find campgrounds near you</div>
+<div class="card">
   <div class="field">
-    <label>Check in</label>
-    <input type="date" id="startDate" />
+    <label>Zip code</label>
+    <input type="number" id="zipcode" placeholder="e.g. 95389" />
   </div>
   <div class="field">
-    <label>Check out</label>
-    <input type="date" id="endDate" />
+    <label>Radius</label>
+    <select id="radius">
+      <option value="25">25 miles</option>
+      <option value="50" selected>50 miles</option>
+      <option value="75">75 miles</option>
+      <option value="100">100 miles</option>
+    </select>
+  </div>
+</div>
+<button class="search-btn" id="findBtn" onclick="findCampgrounds()" style="background:#007aff;">Find Campgrounds</button>
+
+<!-- Campground picker (hidden until search) -->
+<div id="cgSection" style="display:none;">
+  <div class="card-label">2 — Select campground(s)</div>
+  <div class="card" id="cgList"></div>
+</div>
+
+<!-- Step 2: Dates -->
+<div id="dateSection" style="display:none;">
+  <div class="card-label">3 — Pick dates</div>
+  <div class="card">
+    <div class="date-display">
+      <div class="date-chip" id="chipStart"><span>Check in</span><span id="chipStartVal">Tap a date</span></div>
+      <div class="date-chip" id="chipEnd"><span>Check out</span><span id="chipEndVal">Tap a date</span></div>
+    </div>
+    <div class="cal-wrap">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="prevMonth()">‹</button>
+        <span id="calTitle"></span>
+        <button class="cal-nav" onclick="nextMonth()">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
   </div>
 </div>
 
-<div class="section-label" style="margin: 12px 16px 0;">Platforms</div>
-<div class="section">
-  <div class="platforms">
-    <button class="pill active" onclick="togglePill(this)">Recreation.gov</button>
-    <button class="pill active" onclick="togglePill(this)">Reserve America</button>
-    <button class="pill active" onclick="togglePill(this)">Hipcamp</button>
-    <button class="pill active" onclick="togglePill(this)">CA State Parks</button>
+<!-- Site type filter -->
+<div id="siteTypeSection" style="display:none;">
+  <div class="card-label">4 — Site type (optional)</div>
+  <div class="card">
+    <div class="pill-row" id="siteTypePills">
+      <button class="pill site-active" onclick="toggleSiteType(this)" data-type="STANDARD">Standard</button>
+      <button class="pill site-active" onclick="toggleSiteType(this)" data-type="TENT_ONLY_NONELECTRIC">Tent</button>
+      <button class="pill site-active" onclick="toggleSiteType(this)" data-type="RV_NONELECTRIC">RV</button>
+      <button class="pill site-active" onclick="toggleSiteType(this)" data-type="CABIN_NONELECTRIC">Cabin</button>
+      <button class="pill site-active" onclick="toggleSiteType(this)" data-type="GROUP">Group</button>
+    </div>
   </div>
 </div>
 
 <div class="err" id="errMsg"></div>
-<button class="search-btn" id="searchBtn" onclick="runSearch()">Find Campsites</button>
+<button class="search-btn" id="searchBtn" onclick="checkAvailability()" style="display:none;">Check Availability</button>
 
 <div class="status-box" id="statusBox">
-  <span class="spinner">🔍</span>
-  Searching campground platforms…<br>
-  <span style="font-size:13px;">This may take 20–40 seconds</span>
+  <span class="spinner">🏕</span>
+  <span id="statusMsg">Checking availability…</span>
 </div>
 
-<div class="result-box" id="resultBox">
-  <div class="result-label">Results</div>
-  <div id="resultText"></div>
+<div id="resultsArea"></div>
+
+<!-- Other platforms -->
+<div id="otherPlatforms" style="display:none;">
+  <div class="card-label" style="margin-top:20px;">Also search on</div>
+  <div class="other-platforms" id="otherPlatformLinks"></div>
 </div>
-<button class="clear-btn" id="clearBtn" onclick="clearAll()">New Search</button>
+
+<!-- Favorites modal -->
+<div class="modal-overlay" id="favsModal" onclick="closeFavsOutside(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⭐ Saved Campgrounds</div>
+    <div id="favsList"></div>
+  </div>
+</div>
 
 <script>
-  const PROXY = 'https://campscout-proxy.royce-meredith.workers.dev/';
-  const TODAY = new Date().toISOString().split('T')[0];
-  document.getElementById('startDate').min = TODAY;
-  document.getElementById('endDate').min = TODAY;
-  document.getElementById('startDate').addEventListener('change', e => {
-    document.getElementById('endDate').min = e.target.value || TODAY;
+const PROXY = 'https://campscout-proxy.royce-meredith.workers.dev/';
+const REC_GOV_API = 'https://ridb.recreation.gov/api/v1';
+
+// State
+let calYear, calMonth, startDate = null, endDate = null, pickingStart = true;
+let selectedCampgrounds = [];
+let allCampgrounds = [];
+
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('campscout_api_key');
+  if (saved) document.getElementById('apiKeySection').style.display = 'none';
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+});
+
+function saveKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-')) return showErr('That doesn\'t look like a valid API key.');
+  localStorage.setItem('campscout_api_key', key);
+  document.getElementById('apiKeySection').style.display = 'none';
+  showErr('');
+}
+function getKey() { return localStorage.getItem('campscout_api_key') || ''; }
+function showErr(msg) {
+  const el = document.getElementById('errMsg');
+  el.textContent = msg; el.style.display = msg ? 'block' : 'none';
+}
+function setLoading(on, msg) {
+  document.getElementById('statusBox').style.display = on ? 'block' : 'none';
+  if (msg) document.getElementById('statusMsg').textContent = msg;
+}
+
+// ── Calendar ──────────────────────────────────────────────
+function renderCal() {
+  const title = new Date(calYear, calMonth, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  document.getElementById('calTitle').textContent = title;
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-name'; el.textContent = d;
+    grid.appendChild(el);
   });
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
 
-  let mode = 'specific';
+  for (let i = 0; i < firstDay; i++) {
+    grid.appendChild(document.createElement('div'));
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+    el.textContent = d;
+    const date = new Date(calYear, calMonth, d);
+    if (date < today) { el.classList.add('past'); }
+    else {
+      const isStart = startDate && date.getTime() === startDate.getTime();
+      const isEnd = endDate && date.getTime() === endDate.getTime();
+      const inRange = startDate && endDate && date > startDate && date < endDate;
+      if (isStart && isEnd) el.classList.add('selected');
+      else if (isStart) el.classList.add('range-start');
+      else if (isEnd) el.classList.add('range-end');
+      else if (inRange) el.classList.add('in-range');
+      if (date.getTime() === today.getTime()) el.classList.add('today');
+      el.addEventListener('click', () => pickDate(new Date(calYear, calMonth, d)));
+    }
+    grid.appendChild(el);
+  }
+}
+function prevMonth() {
+  calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCal();
+}
+function nextMonth() {
+  calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCal();
+}
+function pickDate(date) {
+  if (pickingStart || (startDate && date < startDate)) {
+    startDate = date; endDate = null; pickingStart = false;
+  } else {
+    endDate = date; pickingStart = true;
+  }
+  updateDateChips(); renderCal(); updateSearchBtn();
+}
+function updateDateChips() {
+  const fmt = d => d ? d.toLocaleDateString('en-US', { month:'short', day:'numeric' }) : 'Tap a date';
+  const sv = document.getElementById('chipStartVal');
+  const ev = document.getElementById('chipEndVal');
+  sv.textContent = fmt(startDate);
+  ev.textContent = fmt(endDate);
+  document.getElementById('chipStart').classList.toggle('set', !!startDate);
+  document.getElementById('chipEnd').classList.toggle('set', !!endDate);
+}
+function fmtAPIDate(d) {
+  return d.toISOString().split('T')[0];
+}
 
-  window.addEventListener('load', () => {
-    const saved = localStorage.getItem('campscout_api_key');
-    if (saved) document.getElementById('apiKeySection').style.display = 'none';
+// ── Site types ────────────────────────────────────────────
+function toggleSiteType(el) { el.classList.toggle('site-active'); }
+function getSelectedSiteTypes() {
+  return [...document.querySelectorAll('#siteTypePills .site-active')].map(p => p.dataset.type);
+}
+
+// ── Find campgrounds via Claude + RIDB API ────────────────
+async function findCampgrounds() {
+  const zip = document.getElementById('zipcode').value.trim();
+  const radius = document.getElementById('radius').value;
+  if (!zip || zip.length < 5) return showErr('Please enter a valid 5-digit zip code.');
+  const key = getKey();
+  if (!key) return showErr('Please enter your API key above first.');
+  showErr('');
+  const btn = document.getElementById('findBtn');
+  btn.disabled = true; btn.textContent = 'Searching…';
+  setLoading(true, 'Finding campgrounds near you…');
+
+  try {
+    // Use Claude to resolve zip to lat/lng, then query RIDB
+    const res = await fetch(PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        apiKey: key,
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        messages: [{
+          role: 'user',
+          content: `Return ONLY a JSON object with lat and lng for zip code ${zip}. Example: {"lat":37.865,"lng":-119.538}. No other text.`
+        }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    const coords = JSON.parse(text.replace(/```json|```/g, '').trim());
+
+    // Query RIDB for campgrounds
+    const ridbUrl = `${REC_GOV_API}/facilities?activity=CAMPING&latitude=${coords.lat}&longitude=${coords.lng}&radius=${radius}&limit=20&full=true`;
+    const ridbRes = await fetch(ridbUrl, { headers: { 'apikey': '22BFADD7-B7F5-4098-84C2-7E1E5D35B83C' } });
+    const ridbData = await ridbRes.json();
+
+    allCampgrounds = (ridbData.RECDATA || []).filter(f => f.FacilityTypeDescription === 'Campground' || f.FacilityName.toLowerCase().includes('camp'));
+
+    if (allCampgrounds.length === 0) {
+      showErr('No Recreation.gov campgrounds found in that area. Try a larger radius.');
+      return;
+    }
+
+    renderCampgroundPicker();
+    document.getElementById('cgSection').style.display = 'block';
+    document.getElementById('dateSection').style.display = 'block';
+    document.getElementById('siteTypeSection').style.display = 'block';
+    renderCal();
+    document.getElementById('cgSection').scrollIntoView({ behavior: 'smooth' });
+
+  } catch (err) {
+    showErr('Search failed: ' + err.message);
+  } finally {
+    setLoading(false);
+    btn.disabled = false; btn.textContent = 'Find Campgrounds';
+  }
+}
+
+function renderCampgroundPicker() {
+  const list = document.getElementById('cgList');
+  list.innerHTML = '';
+  allCampgrounds.forEach(cg => {
+    const div = document.createElement('div');
+    div.className = 'cg-item';
+    div.innerHTML = `
+      <div class="cg-check" id="check-${cg.FacilityID}"></div>
+      <div class="cg-info">
+        <div class="cg-name">${cg.FacilityName}</div>
+        <div class="cg-meta">${cg.FacilityAdaAccess === 'Y' ? '♿ ADA · ' : ''}${cg.FacilityDescription ? cg.FacilityDescription.replace(/<[^>]+>/g,'').slice(0,60)+'…' : ''}</div>
+        <div class="cg-links">
+          <a class="cg-link" href="https://www.recreation.gov/camping/campgrounds/${cg.FacilityID}" target="_blank">View on Recreation.gov →</a>
+          ${cg.FacilityMapURL ? `<a class="cg-link" href="${cg.FacilityMapURL}" target="_blank">Map →</a>` : ''}
+        </div>
+      </div>
+      <button onclick="saveFav('${cg.FacilityID}','${cg.FacilityName.replace(/'/g,"\\'")}','${zip}')" style="background:none;border:none;font-size:18px;cursor:pointer;">⭐</button>
+    `;
+    div.querySelector('.cg-check').parentElement.addEventListener('click', (e) => {
+      if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+      toggleCampground(cg.FacilityID);
+    });
+    list.appendChild(div);
   });
+}
 
-  function saveKey() {
-    const key = document.getElementById('apiKeyInput').value.trim();
-    if (!key.startsWith('sk-')) return showErr('That doesn\'t look like a valid API key.');
-    localStorage.setItem('campscout_api_key', key);
-    document.getElementById('apiKeySection').style.display = 'none';
-    showErr('');
+function toggleCampground(id) {
+  const idx = selectedCampgrounds.indexOf(id);
+  if (idx === -1) selectedCampgrounds.push(id);
+  else selectedCampgrounds.splice(idx, 1);
+  const check = document.getElementById('check-' + id);
+  if (check) {
+    check.classList.toggle('checked', selectedCampgrounds.includes(id));
+    check.textContent = selectedCampgrounds.includes(id) ? '✓' : '';
   }
+  updateSearchBtn();
+}
 
-  function getKey() { return localStorage.getItem('campscout_api_key') || ''; }
+function updateSearchBtn() {
+  const btn = document.getElementById('searchBtn');
+  const ready = selectedCampgrounds.length > 0 && startDate && endDate;
+  btn.style.display = 'block';
+  btn.disabled = !ready;
+  btn.textContent = ready ? `Check Availability (${selectedCampgrounds.length} campground${selectedCampgrounds.length > 1 ? 's' : ''})` : 'Check Availability';
+}
 
-  function setMode(m, btn) {
-    mode = m;
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('mode-specific').style.display = m === 'specific' ? 'block' : 'none';
-    document.getElementById('mode-area').style.display = m === 'area' ? 'block' : 'none';
-  }
+// ── Check availability via Recreation.gov API ─────────────
+async function checkAvailability() {
+  if (!startDate || !endDate) return showErr('Please select dates.');
+  if (selectedCampgrounds.length === 0) return showErr('Please select at least one campground.');
+  showErr('');
+  document.getElementById('resultsArea').innerHTML = '';
+  document.getElementById('otherPlatforms').style.display = 'none';
+  setLoading(true, 'Checking availability…');
+  document.getElementById('searchBtn').disabled = true;
 
-  function togglePill(el) { el.classList.toggle('active'); }
+  const siteTypes = getSelectedSiteTypes();
+  const startStr = fmtAPIDate(startDate);
+  // Recreation.gov availability API needs start_date
+  const results = [];
 
-  function fmtDate(d) {
-    if (!d) return '';
-    return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  }
+  try {
+    for (const cgId of selectedCampgrounds) {
+      const cg = allCampgrounds.find(c => c.FacilityID === cgId);
+      const cgName = cg ? cg.FacilityName : cgId;
 
-  function showErr(msg) {
-    const el = document.getElementById('errMsg');
-    el.textContent = msg;
-    el.style.display = msg ? 'block' : 'none';
-  }
+      // Fetch availability for the month
+      const monthStr = startStr.slice(0, 7) + '-01T00:00:00.000Z';
+      const url = `https://www.recreation.gov/api/camps/availability/campground/${cgId}/month?start_date=${monthStr}`;
 
-  function setLoading(on) {
-    document.getElementById('statusBox').style.display = on ? 'block' : 'none';
-    document.getElementById('searchBtn').disabled = on;
-    document.getElementById('searchBtn').textContent = on ? 'Searching…' : 'Find Campsites';
-    if (on) {
-      document.getElementById('resultBox').style.display = 'none';
-      document.getElementById('clearBtn').style.display = 'none';
-    }
-  }
-
-  async function runSearch() {
-    const key = getKey();
-    if (!key) return showErr('Please enter your API key above first.');
-
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    const platforms = [...document.querySelectorAll('.pill.active')].map(p => p.textContent);
-    if (!startDate || !endDate) return showErr('Please select check-in and check-out dates.');
-    if (platforms.length === 0) return showErr('Select at least one platform.');
-
-    let userMsg = '';
-    if (mode === 'specific') {
-      const campground = document.getElementById('campground').value.trim();
-      if (!campground) return showErr('Please enter a campground name.');
-      userMsg = `Find available campsites at "${campground}" from ${fmtDate(startDate)} to ${fmtDate(endDate)}. Check these platforms: ${platforms.join(', ')}.`;
-    } else {
-      const zip = document.getElementById('zipcode').value.trim();
-      const radius = document.getElementById('radius').value;
-      if (!zip || zip.length < 5) return showErr('Please enter a valid 5-digit zip code.');
-      userMsg = `Find campgrounds with available campsites within ${radius} miles of zip code ${zip}, for dates ${fmtDate(startDate)} to ${fmtDate(endDate)}. Search these platforms: ${platforms.join(', ')}. List campground names, site types, pricing, and direct booking links.`;
-    }
-
-    showErr('');
-    setLoading(true);
-
-    const systemPrompt = `You are a campsite availability research agent. Use web search to find real, current campsite availability.
-
-For SPECIFIC campground searches: search each platform for availability, site types, pricing, direct booking links, and waitlist options.
-
-For AREA searches: determine the region for the zip code, then search each platform for campgrounds nearby. Aim to find 3-5 campgrounds per platform with availability info, site types, pricing, and direct booking links.
-
-Always include direct booking URLs. Never fabricate availability. Format with clear sections per platform.`;
-
-    try {
-      let messages = [{ role: 'user', content: userMsg }];
-      let finalText = '';
-
-      for (let i = 0; i < 8; i++) {
-        const res = await fetch(PROXY, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            apiKey: key,
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 1500,
-            system: systemPrompt,
-            tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-            messages
-          })
+      try {
+        const avRes = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0',
+            'Accept': 'application/json',
+          }
         });
 
-        const data = await res.json();
-        if (data.error) throw new Error(data.error.message);
+        if (!avRes.ok) throw new Error(`HTTP ${avRes.status}`);
+        const avData = await avRes.json();
+        const campsites = avData.campsites || {};
 
-        const textBlocks = data.content.filter(b => b.type === 'text');
-        if (textBlocks.length) finalText = textBlocks.map(b => b.text).join('\n');
-        if (data.stop_reason !== 'tool_use') break;
+        const nights = Math.round((endDate - startDate) / 86400000);
+        const available = [];
 
-        const toolUses = data.content.filter(b => b.type === 'tool_use');
-        messages = [
-          ...messages,
-          { role: 'assistant', content: data.content },
-          { role: 'user', content: toolUses.map(t => ({ type: 'tool_result', tool_use_id: t.id, content: 'Search executed.' })) }
-        ];
+        for (const [siteId, site] of Object.entries(campsites)) {
+          // Filter by site type
+          if (siteTypes.length > 0 && !siteTypes.includes(site.campsite_type)) continue;
+
+          // Check each night is available
+          let allAvail = true;
+          for (let i = 0; i < nights; i++) {
+            const checkD = new Date(startDate);
+            checkD.setDate(checkD.getDate() + i);
+            const key = checkD.toISOString().split('T')[0] + 'T00:00:00Z';
+            if (!site.availabilities || site.availabilities[key] !== 'Available') {
+              allAvail = false; break;
+            }
+          }
+          if (allAvail) {
+            available.push({
+              siteId,
+              siteName: site.site,
+              siteType: site.campsite_type,
+              loop: site.loop,
+              cgId,
+              cgName,
+            });
+          }
+        }
+        results.push({ cgId, cgName, available, nights });
+
+      } catch (e) {
+        results.push({ cgId, cgName, available: null, error: e.message });
       }
-
-      if (!finalText) finalText = 'No results returned. Please try again.';
-      document.getElementById('resultText').textContent = finalText;
-      document.getElementById('resultBox').style.display = 'block';
-      document.getElementById('clearBtn').style.display = 'block';
-      document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth' });
-
-    } catch (err) {
-      showErr('Search failed: ' + err.message);
-    } finally {
-      setLoading(false);
     }
-  }
 
-  function clearAll() {
-    document.getElementById('campground').value = '';
-    document.getElementById('zipcode').value = '';
-    document.getElementById('startDate').value = '';
-    document.getElementById('endDate').value = '';
-    document.getElementById('resultBox').style.display = 'none';
-    document.getElementById('clearBtn').style.display = 'none';
-    showErr('');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    renderResults(results);
+    showOtherPlatforms();
+
+  } catch (err) {
+    showErr('Error: ' + err.message);
+  } finally {
+    setLoading(false);
+    document.getElementById('searchBtn').disabled = false;
   }
+}
+
+function renderResults(results) {
+  const area = document.getElementById('resultsArea');
+  area.innerHTML = '';
+
+  const nights = startDate && endDate ? Math.round((endDate - startDate) / 86400000) : 1;
+  const dateLabel = startDate && endDate
+    ? `${startDate.toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${endDate.toLocaleDateString('en-US',{month:'short',day:'numeric'})} (${nights} night${nights > 1 ? 's' : ''})`
+    : '';
+
+  results.forEach(r => {
+    const section = document.createElement('div');
+    section.className = 'result-section';
+
+    const title = document.createElement('div');
+    title.className = 'result-section-title';
+    title.textContent = r.cgName + (dateLabel ? ' · ' + dateLabel : '');
+    section.appendChild(title);
+
+    if (r.error) {
+      const msg = document.createElement('div');
+      msg.className = 'no-avail';
+      msg.innerHTML = `⚠️ Couldn't load availability. <a href="https://www.recreation.gov/camping/campgrounds/${r.cgId}" target="_blank" style="color:#007aff;">Check manually →</a>`;
+      section.appendChild(msg);
+    } else if (!r.available || r.available.length === 0) {
+      const msg = document.createElement('div');
+      msg.className = 'no-avail';
+      msg.innerHTML = `No available sites for these dates. <a href="https://www.recreation.gov/camping/campgrounds/${r.cgId}" target="_blank" style="color:#007aff;">Try different dates →</a>`;
+      section.appendChild(msg);
+    } else {
+      r.available.slice(0, 15).forEach(site => {
+        const item = document.createElement('div');
+        item.className = 'site-item';
+        const bookUrl = `https://www.recreation.gov/camping/campsites/${site.siteId}`;
+        item.innerHTML = `
+          <div class="site-info">
+            <div class="site-name">Site ${site.siteName}</div>
+            <div class="site-meta">${site.loop ? 'Loop ' + site.loop + ' · ' : ''}${(site.siteType || '').replace(/_/g,' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase())}</div>
+          </div>
+          <a class="book-btn" href="${bookUrl}" target="_blank">Book</a>
+        `;
+        section.appendChild(item);
+      });
+      if (r.available.length > 15) {
+        const more = document.createElement('div');
+        more.style.cssText = 'text-align:center;padding:8px;font-size:13px;color:#8e8e93;';
+        more.textContent = `+${r.available.length - 15} more sites`;
+        section.appendChild(more);
+      }
+    }
+    area.appendChild(section);
+  });
+}
+
+function showOtherPlatforms() {
+  const zip = document.getElementById('zipcode').value.trim();
+  const s = startDate ? fmtAPIDate(startDate) : '';
+  const e = endDate ? fmtAPIDate(endDate) : '';
+  const platforms = [
+    { name: 'Reserve America', note: 'State & private parks', url: `https://www.reserveamerica.com/explore/search-results?country=US&arrivalDate=${s}&departureDate=${e}` },
+    { name: 'Hipcamp', note: 'Unique & private sites', url: `https://www.hipcamp.com/discover?${zip ? 'q='+zip : ''}` },
+    { name: 'CA State Parks', note: 'California state campgrounds', url: `https://www.reservecalifornia.com/Web/#!park/0` },
+  ];
+  const container = document.getElementById('otherPlatformLinks');
+  container.innerHTML = '';
+  platforms.forEach(p => {
+    const a = document.createElement('a');
+    a.className = 'platform-link';
+    a.href = p.url; a.target = '_blank';
+    a.innerHTML = `<div><span>${p.name}</span><br><small>${p.note}</small></div><span style="color:#007aff;font-size:18px;">›</span>`;
+    container.appendChild(a);
+  });
+  document.getElementById('otherPlatforms').style.display = 'block';
+}
+
+// ── Favorites ─────────────────────────────────────────────
+function getFavs() { return JSON.parse(localStorage.getItem('campscout_favs') || '[]'); }
+function saveFavs(favs) { localStorage.setItem('campscout_favs', JSON.stringify(favs)); }
+
+function saveFav(id, name, zip) {
+  const favs = getFavs();
+  if (favs.find(f => f.id === id)) return;
+  favs.push({ id, name, zip });
+  saveFavs(favs);
+  alert(`⭐ Saved ${name}`);
+}
+
+function openFavs() {
+  const favs = getFavs();
+  const list = document.getElementById('favsList');
+  list.innerHTML = '';
+  if (favs.length === 0) {
+    list.innerHTML = '<div class="empty-state">No saved campgrounds yet.<br>Tap ⭐ next to a campground to save it.</div>';
+  } else {
+    favs.forEach((f, i) => {
+      const div = document.createElement('div');
+      div.className = 'fav-item';
+      div.innerHTML = `
+        <div>
+          <div class="fav-item-name">${f.name}</div>
+          <div class="fav-item-meta">ID: ${f.id}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="fav-use-btn" onclick="useFav('${f.id}')">Use</button>
+          <button class="fav-del-btn" onclick="delFav(${i})">×</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+  document.getElementById('favsModal').classList.add('open');
+}
+
+function useFav(id) {
+  closeFavs();
+  const cg = allCampgrounds.find(c => c.FacilityID === id);
+  if (cg) {
+    if (!selectedCampgrounds.includes(id)) toggleCampground(id);
+    document.getElementById('cgSection').scrollIntoView({ behavior: 'smooth' });
+  } else {
+    alert('Load campgrounds for this area first, then use favorites to quickly select them.');
+  }
+}
+
+function delFav(i) {
+  const favs = getFavs(); favs.splice(i, 1); saveFavs(favs); openFavs();
+}
+function closeFavs() { document.getElementById('favsModal').classList.remove('open'); }
+function closeFavsOutside(e) { if (e.target === document.getElementById('favsModal')) closeFavs(); }
 </script>
 </body>
 </html>
