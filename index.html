@@ -109,6 +109,10 @@
       <option value="100">100 miles</option>
     </select>
   </div>
+  <div class="field">
+    <label>Keyword</label>
+    <input type="text" id="keyword" placeholder="e.g. Yosemite (optional)" style="text-align:right;border:none;outline:none;font-size:15px;background:transparent;font-family:inherit;flex:1;color:#1c1c1e;"/>
+  </div>
 </div>
 <button class="primary-btn blue" id="findBtn" onclick="findCampgrounds()">Find Campgrounds</button>
 
@@ -245,17 +249,32 @@ async function findCampgrounds() {
   setLoading(true,'Finding campgrounds…');
   try {
     const radius=document.getElementById('radius').value;
-    const path=`/facilities?facilitytype=Campground&latitude=${pinLat.toFixed(5)}&longitude=${pinLng.toFixed(5)}&radius=${radius}&limit=50&full=true`;
-    const d=await proxyFetch({proxy:'ridb',path});
-    const raw = d.RECDATA || [];
-    // Try strict filter first, fall back to looser if nothing found
-    allCampgrounds = raw.filter(f =>
-      f.FacilityTypeDescription === 'Campground' ||
+    const keyword=(document.getElementById('keyword').value||'').trim();
+
+    // Always run coordinate search
+    const coordPath=`/facilities?facilitytype=Campground&latitude=${pinLat.toFixed(5)}&longitude=${pinLng.toFixed(5)}&radius=${radius}&limit=100&full=true`;
+    const coordResp=await proxyFetch({proxy:'ridb',path:coordPath});
+    let combined=(coordResp.RECDATA||[]);
+
+    // Also run keyword search if provided, or always run one based on area
+    const kwQuery=keyword||'';
+    if(kwQuery){
+      const kwPath=`/facilities?facilitytype=Campground&query=${encodeURIComponent(kwQuery)}&limit=50&full=true`;
+      const kwResp=await proxyFetch({proxy:'ridb',path:kwPath});
+      const kwResults=kwResp.RECDATA||[];
+      // Merge, dedup by FacilityID
+      const seen=new Set(combined.map(f=>f.FacilityID));
+      kwResults.forEach(f=>{ if(!seen.has(f.FacilityID)){ combined.push(f); seen.add(f.FacilityID); } });
+    }
+
+    // Filter to campgrounds only
+    allCampgrounds=combined.filter(f=>
+      f.FacilityTypeDescription==='Campground'||
       (f.FacilityName||'').toLowerCase().includes('camp')
     );
-    // If still nothing, just show everything returned
-    if (!allCampgrounds.length) allCampgrounds = raw;
-    if (!allCampgrounds.length) { showErr('No campgrounds found in this area. Try a larger radius or move the pin.'); return; }
+    if(!allCampgrounds.length) allCampgrounds=combined;
+    if(!allCampgrounds.length){ showErr('No campgrounds found. Try a larger radius or add a keyword.'); return; }
+
     selectedCGs=[];
     renderCGPicker();
     ['cgSection','dateSection','siteTypeSection'].forEach(id=>document.getElementById(id).style.display='block');
