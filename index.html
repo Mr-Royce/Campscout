@@ -479,6 +479,10 @@ async function checkAvailability(){
         }
         const available=[];
         const statusSample = {};
+        const firstSite = Object.values(campsites)[0];
+        console.log('First site keys:', Object.keys(firstSite));
+        console.log('First site availabilities type:', typeof firstSite.availabilities, Array.isArray(firstSite.availabilities));
+        console.log('First site availabilities:', JSON.stringify(firstSite.availabilities).slice(0,300));
         for(const [siteId,site] of Object.entries(campsites)){
           if(siteTypes.length&&!siteTypes.includes(site.campsite_type)) continue;
           let ok=true;
@@ -488,7 +492,7 @@ async function checkAvailability(){
             if(i===0&&siteId===Object.keys(campsites)[0]) console.log('Checking key:', key, '→', site.availabilities?.[key]);
             const status = site.availabilities?.[key];
             if(!status || status === 'Reserved' || status === 'Not Available' || status === 'NYR'){ok=false;break;}
-            if(status === 'Not Reservable') { ok = 'walkin'; }
+            if(status === 'Not Reservable') ok = 'walkin';
           }
           if(ok) available.push({siteId,siteName:site.site,siteType:site.campsite_type,loop:site.loop,walkin:ok==='walkin'});
           // Collect status for first night across all sites
