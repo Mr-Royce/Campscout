@@ -480,9 +480,9 @@ async function checkAvailability(){
           if(siteTypes.length&&!siteTypes.includes(site.campsite_type)) continue;
           let ok=true;
           for(let i=0;i<nights;i++){
-            const cd=new Date(startDate); cd.setDate(cd.getDate()+i);
+            const cd=new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()+i);
             const key=fmtDate(cd)+'T00:00:00Z';
-            // RecGov returns keys like '2026-04-26T00:00:00Z'
+            if(i===0&&siteId===Object.keys(campsites)[0]) console.log('Checking key:', key, '→', site.availabilities?.[key]);
             if(!site.availabilities||site.availabilities[key]!=='Available'){ok=false;break;}
           }
           if(ok) available.push({siteId,siteName:site.site,siteType:site.campsite_type,loop:site.loop});
