@@ -448,16 +448,15 @@ async function checkAvailability(){
       const cgName=cg?cg.FacilityName:cgId;
       const month=fmtDate(startDate).slice(0,7)+'-01T00:00:00.000Z';
       try{
-        // Recreation.gov wants the date double-encoded in the query string
-        const avUrl = `https://www.recreation.gov/api/camps/availability/campground/${cgId}/month?start_date=${encodeURIComponent(month)}`;
-        const avResp = await fetch(avUrl, {
-          credentials: 'include',
-          headers: {
-            'Accept': 'application/json, text/plain, */*',
-            'Referer': 'https://www.recreation.gov/',
-            'Origin': 'https://www.recreation.gov',
-          }
-        });
+        // Route through worker to avoid CORS, with retry on 429
+        const avParams = new URLSearchParams({ proxy: 'recgov', cgId, month });
+        let avResp, attempts = 0;
+        while (attempts < 3) {
+          if (attempts > 0) await new Promise(r => setTimeout(r, 2000 * attempts));
+          avResp = await fetch(`${PROXY}?${avParams.toString()}`);
+          if (avResp.status !== 429) break;
+          attempts++;
+        }
         if (!avResp.ok) throw new Error(`HTTP ${avResp.status}`);
         const avData = await avResp.json();
         console.log('avData keys:', Object.keys(avData));
