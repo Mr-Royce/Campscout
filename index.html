@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -153,7 +152,7 @@
       font-size: 15px;
       display: none;
     }
-    .status-box .spinner {
+    .spinner {
       font-size: 32px;
       display: block;
       margin-bottom: 10px;
@@ -168,7 +167,7 @@
       display: none;
     }
     .clear-btn {
-      display: block;
+      display: none;
       width: calc(100% - 32px);
       margin: 12px 16px 0;
       padding: 13px;
@@ -179,7 +178,6 @@
       color: #8e8e93;
       cursor: pointer;
       font-family: inherit;
-      display: none;
     }
     #apiKeySection {
       background: #fff3cd;
@@ -221,8 +219,6 @@
   <p>AI campsite availability agent</p>
 </header>
 
-<!-- API Key setup -->
-
 <div id="apiKeySection">
   <strong>Enter your Anthropic API key to get started.</strong><br>
   It will be saved in your browser for future visits.
@@ -230,17 +226,13 @@
   <button class="save-key-btn" onclick="saveKey()">Save Key</button>
 </div>
 
-<!-- Mode tabs -->
-
 <div class="tabs">
   <button class="tab active" onclick="setMode('specific', this)">Specific campground</button>
   <button class="tab" onclick="setMode('area', this)">Area search</button>
 </div>
 
-<!-- Specific campground -->
-
 <div id="mode-specific">
-  <div class="section-label" style="margin: 0 16px; padding-left:0; padding-right:0;">Campground</div>
+  <div class="section-label" style="margin: 12px 16px 0;">Campground</div>
   <div class="section">
     <div class="field">
       <label>Name</label>
@@ -249,14 +241,12 @@
   </div>
 </div>
 
-<!-- Area search -->
-
 <div id="mode-area" style="display:none;">
-  <div class="section-label" style="margin: 0 16px; padding-left:0; padding-right:0;">Location</div>
+  <div class="section-label" style="margin: 12px 16px 0;">Location</div>
   <div class="section">
     <div class="field">
       <label>Zip code</label>
-      <input type="number" id="zipcode" placeholder="95389" maxlength="5" />
+      <input type="number" id="zipcode" placeholder="95389" />
     </div>
     <div class="field">
       <label>Radius</label>
@@ -271,9 +261,7 @@
   </div>
 </div>
 
-<!-- Dates -->
-
-<div class="section-label" style="margin: 12px 16px 0; padding:0;">Dates</div>
+<div class="section-label" style="margin: 12px 16px 0;">Dates</div>
 <div class="section">
   <div class="field">
     <label>Check in</label>
@@ -285,9 +273,7 @@
   </div>
 </div>
 
-<!-- Platforms -->
-
-<div class="section-label" style="margin: 12px 16px 0; padding:0;">Platforms</div>
+<div class="section-label" style="margin: 12px 16px 0;">Platforms</div>
 <div class="section">
   <div class="platforms">
     <button class="pill active" onclick="togglePill(this)">Recreation.gov</button>
@@ -300,15 +286,11 @@
 <div class="err" id="errMsg"></div>
 <button class="search-btn" id="searchBtn" onclick="runSearch()">Find Campsites</button>
 
-<!-- Status / loading -->
-
 <div class="status-box" id="statusBox">
   <span class="spinner">🔍</span>
   Searching campground platforms…<br>
   <span style="font-size:13px;">This may take 20–40 seconds</span>
 </div>
-
-<!-- Results -->
 
 <div class="result-box" id="resultBox">
   <div class="result-label">Results</div>
@@ -317,6 +299,7 @@
 <button class="clear-btn" id="clearBtn" onclick="clearAll()">New Search</button>
 
 <script>
+  const PROXY = 'https://campscout-proxy.royce-meredith.workers.dev/';
   const TODAY = new Date().toISOString().split('T')[0];
   document.getElementById('startDate').min = TODAY;
   document.getElementById('endDate').min = TODAY;
@@ -326,12 +309,9 @@
 
   let mode = 'specific';
 
-  // Load saved API key
   window.addEventListener('load', () => {
     const saved = localStorage.getItem('campscout_api_key');
-    if (saved) {
-      document.getElementById('apiKeySection').style.display = 'none';
-    }
+    if (saved) document.getElementById('apiKeySection').style.display = 'none';
   });
 
   function saveKey() {
@@ -342,9 +322,7 @@
     showErr('');
   }
 
-  function getKey() {
-    return localStorage.getItem('campscout_api_key') || '';
-  }
+  function getKey() { return localStorage.getItem('campscout_api_key') || ''; }
 
   function setMode(m, btn) {
     mode = m;
@@ -415,14 +393,11 @@ Always include direct booking URLs. Never fabricate availability. Format with cl
       let finalText = '';
 
       for (let i = 0; i < 8; i++) {
-        const res = await fetch('https://campscout-proxy.royce-meredith.workers.dev/', {
+        const res = await fetch(PROXY, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': key,
-            'anthropic-version': '2023-06-01'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            apiKey: key,
             model: 'claude-sonnet-4-20250514',
             max_tokens: 1500,
             system: systemPrompt,
@@ -470,6 +445,5 @@ Always include direct booking URLs. Never fabricate availability. Format with cl
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 </script>
-
 </body>
 </html>
