@@ -415,7 +415,7 @@ Always include direct booking URLs. Never fabricate availability. Format with cl
       let finalText = '';
 
       for (let i = 0; i < 8; i++) {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await fetch('https://campscout-proxy.royce-meredith.workers.dev/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
