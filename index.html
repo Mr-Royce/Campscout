@@ -446,7 +446,7 @@ async function checkAvailability(){
     for(const cgId of selectedCGs){
       const cg=allCampgrounds.find(c=>c.FacilityID===cgId);
       const cgName=cg?cg.FacilityName:cgId;
-      const month=fmtDate(startDate).slice(0,7)+'-01T00:00:00.000Z';
+      const month=fmtDate(startDate).slice(0,7)+'-01T00:00:00Z';
       try{
         // Call Recreation.gov directly — their availability API supports browser CORS
         const avUrl = `https://www.recreation.gov/api/camps/availability/campground/${cgId}/month?start_date=${encodeURIComponent(month)}`;
@@ -465,7 +465,7 @@ async function checkAvailability(){
         if (sampleSite) {
           const sampleKeys = Object.keys(sampleSite.availabilities||{}).slice(0,3);
           console.log('Actual keys from RecGov:', sampleKeys);
-          console.log('We are checking for:', fmtDate(startDate)+'T00:00:00.000Z');
+          console.log('We are checking for:', fmtDate(startDate)+'T00:00:00Z');
         }
         const available=[];
         for(const [siteId,site] of Object.entries(campsites)){
