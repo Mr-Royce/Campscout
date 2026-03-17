@@ -328,19 +328,19 @@ async function findCampgrounds() {
       });
     }
 
-    // Filter to campgrounds client-side
+    // Filter to campgrounds client-side — only show ones bookable on Recreation.gov
     const CAMP_WORDS = ['campground','camping','rv park','rv resort'];
     const BLOCK_WORDS = ['picnic','shelter','visitor','marina','lodge','cabin rental','hostel','hotel','museum','trailhead','boat','swim','fishing','historic','heritage','plaza','office','center','powerhouse','mansion','inn','stock','equestrian'];
-    allCampgrounds = combined.filter(f => {
+    const isCampground = f => {
       const name = (f.FacilityName||'').toLowerCase();
       const type = (f.FacilityTypeDescription||'').toLowerCase();
       if (BLOCK_WORDS.some(w => name.includes(w))) return false;
       return type.includes('campground') || CAMP_WORDS.some(w => name.includes(w));
-    });
-    if (!allCampgrounds.length) allCampgrounds = combined.filter(f => {
-      const name = (f.FacilityName||'').toLowerCase();
-      return !['picnic','shelter','visitor','marina','powerhouse','mansion'].some(w => name.includes(w));
-    });
+    };
+    // Prefer reservable campgrounds with a Recreation.gov URL
+    const reservable = combined.filter(f => isCampground(f) && f.Reservable === true);
+    const allValid = combined.filter(f => isCampground(f));
+    allCampgrounds = reservable.length ? reservable : allValid;
     if (!allCampgrounds.length) { showErr('No campgrounds found. Try a larger radius or add a keyword.'); return; }
 
     selectedCGs=[];
@@ -463,6 +463,10 @@ async function checkAvailability(){
           avResp = await fetch(`${PROXY}?${avParams.toString()}`);
           if (avResp.status !== 429) break;
           attempts++;
+        }
+        if (avResp.status === 404) {
+          results.push({cgId, cgName, available:null, error:'Not available for online booking'});
+          continue;
         }
         if (!avResp.ok) throw new Error(`HTTP ${avResp.status}`);
         const avData = await avResp.json();
