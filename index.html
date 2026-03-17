@@ -330,7 +330,7 @@ async function findCampgrounds() {
 
     // Filter to campgrounds client-side
     const CAMP_WORDS = ['campground','camping','rv park','rv resort'];
-    const BLOCK_WORDS = ['picnic','shelter','visitor','marina','lodge','cabin rental','hostel','hotel','museum','trailhead','boat','swim','fishing','historic','heritage','plaza','office','center','powerhouse','mansion','inn'];
+    const BLOCK_WORDS = ['picnic','shelter','visitor','marina','lodge','cabin rental','hostel','hotel','museum','trailhead','boat','swim','fishing','historic','heritage','plaza','office','center','powerhouse','mansion','inn','stock','equestrian'];
     allCampgrounds = combined.filter(f => {
       const name = (f.FacilityName||'').toLowerCase();
       const type = (f.FacilityTypeDescription||'').toLowerCase();
