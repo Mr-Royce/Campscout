@@ -337,40 +337,18 @@ async function findCampgrounds() {
     console.log('Search debug:', JSON.stringify(d.debug));
     console.log('Total results:', (d.RECDATA||[]).length);
     let combined = d.RECDATA || [];
+    console.log('Raw results from worker:', combined.length);
 
-    // Filter by distance from pin using haversine
-    const radiusMiles = parseInt(radius);
-    if (pinLat && pinLng && combined.length) {
-      combined = combined.filter(f => {
-        const fLat = parseFloat(f.FacilityLatitude);
-        const fLng = parseFloat(f.FacilityLongitude);
-        if (!fLat || !fLng) return true; // keep if no coords
-        const R = 3958.8;
-        const dLat = (fLat - pinLat) * Math.PI / 180;
-        const dLng = (fLng - pinLng) * Math.PI / 180;
-        const a = Math.sin(dLat/2)**2 + Math.cos(pinLat*Math.PI/180) * Math.cos(fLat*Math.PI/180) * Math.sin(dLng/2)**2;
-        const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return dist <= radiusMiles;
-      });
-    }
-
-    // Filter to campgrounds client-side — only show ones bookable on Recreation.gov
-    const CAMP_WORDS = ['campground','camping','rv park','rv resort','camp','recreation area','lake','reservoir','forest','wilderness','national'];
-    const BLOCK_WORDS = ['picnic shelter','visitor center','visitor centre','marina office','lodge check','cabin rental','hostel','hotel','museum','trailhead','boat launch','swim beach','fishing pier','historic site','heritage center','powerhouse','mansion','inn ','stock camp','equestrian camp','administrative','headquarters','parking'];
-    const isCampground = f => {
-      const name = (f.FacilityName||'').toLowerCase();
-      const type = (f.FacilityTypeDescription||'').toLowerCase();
-      if (BLOCK_WORDS.some(w => name.includes(w))) return false;
-      // Include if type says campground, OR if it has reservable campsites
-      if (type.includes('campground')) return true;
-      if (f.Reservable === true) return true;
-      // Include recreation areas, lakes, forests that likely have camping
-      if (CAMP_WORDS.some(w => name.includes(w))) return true;
-      return false;
-    };
-    const reservable = combined.filter(f => isCampground(f) && f.Reservable === true);
-    const allValid = combined.filter(f => isCampground(f));
-    allCampgrounds = reservable.length ? reservable : allValid;
+    // Filter out obvious non-campgrounds using a blocklist
+    const BLOCK_EXACT = ['Sanctuary Exploration Center','Hayes Mansion','Wolverton Stock Campsites'];
+    const BLOCK_WORDS = ['picnic shelter','visitor center','visitor centre','boat launch ramp','swim beach','fishing pier','historic landmark','powerhouse','mansion','administrative office','headquarters','parking area','day use'];
+    allCampgrounds = combined.filter(f => {
+      const name = (f.FacilityName||'');
+      if (BLOCK_EXACT.includes(name)) return false;
+      const nameLower = name.toLowerCase();
+      if (BLOCK_WORDS.some(w => nameLower.includes(w))) return false;
+      return true;
+    });
     if (!allCampgrounds.length) { showErr('No campgrounds found. Try a larger radius or add a keyword.'); return; }
 
     selectedCGs=[];
